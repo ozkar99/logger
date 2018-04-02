@@ -82,15 +82,16 @@ func getFormatedMessage(format string, values ...interface{}) string {
 	return fmt.Sprintf(format, values...)
 }
 
+var createTableSQL string
+
+func SetCreateTableSQL(sql string) {
+	createTableSQL = sql
+}
+
 func createLogTableIfNotExists(db *sql.DB) {
 	if db == nil {
 		return
 	}
 
-	db.Exec(`create table if not exists logs (
-		ID int not null auto_increment primary key,
-		Level varchar(10) not null,
-		Message varchar(250) not null,
-		CreatedAt timestamp(4) default current_timestamp(6))
-	`)
+	db.Exec(createTableSQL)
 }
