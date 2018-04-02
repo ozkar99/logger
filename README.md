@@ -11,23 +11,20 @@ import _ "github.com/ozkar99/logger/dialects/sqlite"
 // import _ "github.com/ozkar99/logger/dialects/mysql"
 ```
 
-Then to use pass a db connection in the options struct:  
+Then to use pass a `*sql.DB` connection as the first parameter:
 ```
-logger := logger.New(logger.Options{Writer: os.Stdout, Database: db})
+logger := logger.New(db)
 logger.Debug("Hello %s", "mom")
 ```
 
 this will create the `logs` table as well as an entry with type `Debug` on the table.  
 
-if you only want to log to `stdout` or any other `writer` just dont pass the `db` parameter to the `Options` struct.  
+You can also write to aditional `io.Writer` interfaces, if you pass them on the constructor: 
 ```
-logger := logger.New(logger.Options{Writer: os.Stdout})
+logger := logger.New(db, os.Stdout, fileHandle, ...)
 ```
 
-like wise if you only want to log to the database:  
-```
-logger := logger.New(logger.Options{Database: db})
-```
+The constructor is variadic, the first argument needs to be a `*sql.DB` the rest of the arguments  `io.Writer` or ommited like in the first example.
 
 ## supported levels:
 

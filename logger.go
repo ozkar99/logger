@@ -2,10 +2,8 @@ package logger
 
 import (
 	"database/sql"
-	"fmt"
 	"io"
 	"sync"
-	"time"
 )
 
 type Logger interface {
@@ -16,82 +14,32 @@ type Logger interface {
 	Fatal(string, ...interface{})
 }
 
-type Options struct {
-	Database *sql.DB
-	Writer   io.Writer
-}
-
-type log struct {
-	Options
+type logger struct {
+	options
 	mu sync.Mutex
 }
 
-func New(opts Options) Logger {
-	createLogTableIfNotExists(opts.Database)
-	return &log{Options: opts, mu: sync.Mutex{}}
+func New(database *sql.DB, writers ...io.Writer) Logger {
+	createLogTableIfNotExists(database)
+	return &logger{options: options{database, writers}, mu: sync.Mutex{}}
 }
 
-func (l *log) Debug(format string, values ...interface{}) {
-	logger(l, "DEBUG", format, values...)
+func (l *logger) Debug(format string, values ...interface{}) {
+	log(l, "DEBUG", format, values...)
 }
 
-func (l *log) Info(format string, values ...interface{}) {
-	logger(l, "INFO", format, values...)
+func (l *logger) Info(format string, values ...interface{}) {
+	log(l, "INFO", format, values...)
 }
 
-func (l *log) Warn(format string, values ...interface{}) {
-	logger(l, "WARN", format, values...)
+func (l *logger) Warn(format string, values ...interface{}) {
+	log(l, "WARN", format, values...)
 }
 
-func (l *log) Error(format string, values ...interface{}) {
-	logger(l, "ERROR", format, values...)
+func (l *logger) Error(format string, values ...interface{}) {
+	log(l, "ERROR", format, values...)
 }
 
-func (l *log) Fatal(format string, values ...interface{}) {
-	logger(l, "FATAL", format, values...)
-}
-
-func logger(l *log, level, format string, values ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	time := time.Now().UTC()
-
-	if l.Writer != nil {
-		loggerWriter(l.Writer, time, level, format, values...)
-	}
-
-	if l.Database != nil {
-		loggerQuery(l.Database, time, level, format, values...)
-	}
-}
-
-func loggerQuery(db *sql.DB, time time.Time, level, format string, values ...interface{}) error {
-	message := getFormatedMessage(format, values...)
-	_, err := db.Exec(`insert into logs (level, message) values (?, ?)`, level, message)
-	return err
-}
-
-func loggerWriter(w io.Writer, time time.Time, level, format string, values ...interface{}) {
-	message := getFormatedMessage(format, values...)
-	message = fmt.Sprintf("%s %s: %s", time.Format("2006/04/02 15:04:05"), level, message)
-	fmt.Fprintln(w, message)
-}
-
-func getFormatedMessage(format string, values ...interface{}) string {
-	return fmt.Sprintf(format, values...)
-}
-
-var createTableSQL string
-
-func SetCreateTableSQL(sql string) {
-	createTableSQL = sql
-}
-
-func createLogTableIfNotExists(db *sql.DB) {
-	if db == nil {
-		return
-	}
-
-	db.Exec(createTableSQL)
+func (l *logger) Fatal(format string, values ...interface{}) {
+	log(l, "FATAL", format, values...)
 }
