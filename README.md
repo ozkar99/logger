@@ -29,6 +29,14 @@ like wise if you only want to log to the database:
 logger := logger.New(logger.Options{Database: db})
 ```
 
+## supported levels:
+
+- Debug
+- Info
+- Warn
+- Error
+- Fatal
+
 ## todo:
  - add postgresql dialect
  - add mssql dialect
