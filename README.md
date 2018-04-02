@@ -19,6 +19,16 @@ logger.Debug("Hello %s", "mom")
 
 this will create the `logs` table as well as an entry with type `Debug` on the table.  
 
+if you only want to log to `stdout` or any other `writer` just dont pass the `db` parameter to the `Opts` struct.  
+```
+logger := logger.New(logger.Options{Writer: os.Stdout})
+```
+
+like wise if you only want to log to the database:  
+```
+logger := logger.New(logger.Options{Database: db})
+```
+
 ## todo:
  - add postgresql dialect
  - add mssql dialect
