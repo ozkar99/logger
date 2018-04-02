@@ -19,7 +19,7 @@ logger.Debug("Hello %s", "mom")
 
 this will create the `logs` table as well as an entry with type `Debug` on the table.  
 
-if you only want to log to `stdout` or any other `writer` just dont pass the `db` parameter to the `Opts` struct.  
+if you only want to log to `stdout` or any other `writer` just dont pass the `db` parameter to the `Options` struct.  
 ```
 logger := logger.New(logger.Options{Writer: os.Stdout})
 ```
